@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Chat App</string>
+    <string name="verify_otp">Verify OTP</string>
+    <string name="otp_verification_screen">OTP\nVerification Screen</string>
+    <string name="resent_otp">Resent OTP</string>
+    <string name="registration_screen">Registration Screen</string>
+    <string name="mobile_number">10 digit mobile number</string>
+    <string name="sent_otp">Sent OTP</string>
+    <string name="user_name">User name</string>
+    <string name="about">About</string>
+    <string name="logout">Logout</string>
+    <string name="all_users">All users</string>
+    <string name="type_here">Type here...</string>
+    <string name="online">Online</string>
+</resources>

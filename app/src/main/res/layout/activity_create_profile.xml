@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".activities.CreateProfileActivity">
+
+    <ImageView
+        android:id="@+id/image_logo_title"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_launcher"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/text_logo_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textColor="@color/black"
+        android:layout_marginStart="20dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintStart_toEndOf="@id/image_logo_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/image_logo_title"
+        app:layout_constraintBottom_toBottomOf="@id/image_logo_title"/>
+
+    <ImageView
+        android:id="@+id/image_button_save"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_round_check"
+        app:tint="#4CAF50"
+        android:padding="10dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/circle_image"
+        android:contentDescription="@string/app_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/image_logo_title"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardUserImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:cardCornerRadius="75dp"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/ePersonName">
+
+        <ImageView
+            android:id="@+id/imageUser"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_round_image"
+            android:scaleType="fitXY"
+            android:contentDescription="@string/app_name"/>
+
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:id="@+id/image_user"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:padding="10dp"
+        android:src="@drawable/ic_round_photo_camera"
+        android:background="@drawable/circle_image"
+        android:elevation="10dp"
+        android:contentDescription="@string/app_name"
+        app:layout_constraintEnd_toEndOf="@id/cardUserImage"
+        app:layout_constraintBottom_toBottomOf="@id/cardUserImage"/>
+
+    <EditText
+        android:id="@+id/ePersonName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/user_name"
+        android:textColorHint="#BABABA"
+        android:textColor="@color/black"
+        android:autofillHints="none"
+        android:padding="12dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edit_background"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardUserImage"
+        app:layout_constraintBottom_toTopOf="@id/eAbout"/>
+
+    <EditText
+        android:id="@+id/eAbout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/about"
+        android:textColorHint="#BABABA"
+        android:textColor="@color/black"
+        android:autofillHints="none"
+        android:padding="12dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/edit_background"
+        android:inputType="textMultiLine"
+        android:maxHeight="120dp"
+        app:layout_constraintStart_toStartOf="@id/ePersonName"
+        app:layout_constraintEnd_toEndOf="@id/ePersonName"
+        app:layout_constraintTop_toBottomOf="@id/ePersonName"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
