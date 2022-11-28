@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.chatapp.R;
 import com.chatapp.adapters.ResentConversionAdapter;
+import com.chatapp.help.Constant;
 import com.chatapp.help.Preferences;
 import com.chatapp.listeners.ConversionListener;
 import com.chatapp.models.ChatMessageModel;
@@ -29,10 +30,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends BaseActivity implements ConversionListener {
 
-    private static final String TAG = "MainActivity";
     private Preferences preferences;
     private HashMap<String, String> userData;
     private FirebaseAuth auth;
@@ -64,10 +65,10 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         findViewById(R.id.text_logout)
                 .setOnClickListener(v -> {
                     HashMap<String, Object> updates = new HashMap<>();
-                    updates.put("token", FieldValue.delete());
+                    updates.put(Constant.USER_TOKEN, FieldValue.delete());
                     DocumentReference reference = FirebaseFirestore.getInstance()
-                            .collection("users")
-                            .document(auth.getUid());
+                            .collection(Constant.USER_DIR)
+                            .document(Objects.requireNonNull(auth.getUid()));
                     reference.update(updates)
                             .addOnSuccessListener(unused -> {
                                 preferences.dataClear();
@@ -93,12 +94,12 @@ public class MainActivity extends BaseActivity implements ConversionListener {
     }
 
     private void listenConversion(){
-        firestore.collection("conversions")
-                .whereEqualTo("senderId",auth.getUid())
+        firestore.collection(Constant.KEY_CONVERSIONS)
+                .whereEqualTo(Constant.KEY_SENDER_ID,auth.getUid())
                 .addSnapshotListener(eventListener);
 
-        firestore.collection("conversions")
-                .whereEqualTo("receiverId", auth.getUid())
+        firestore.collection(Constant.KEY_CONVERSIONS)
+                .whereEqualTo(Constant.KEY_RECEIVER_ID, auth.getUid())
                 .addSnapshotListener(eventListener);
     }
 
@@ -110,32 +111,32 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         if (value != null){
             for (DocumentChange documentChange : value.getDocumentChanges()){
                 if (documentChange.getType() == DocumentChange.Type.ADDED){
-                    String senderId = documentChange.getDocument().getString("senderId");
-                    String receiverId = documentChange.getDocument().getString("receiverId");
+                    String senderId = documentChange.getDocument().getString(Constant.KEY_SENDER_ID);
+                    String receiverId = documentChange.getDocument().getString(Constant.KEY_RECEIVER_ID);
                     ChatMessageModel messageModel = new ChatMessageModel();
                     messageModel.senderId = senderId;
                     messageModel.receiverId = receiverId;
 
-                    if (userData.get(Preferences.USER_ID).equals(senderId)){
-                        messageModel.conversionName = documentChange.getDocument().getString("receiverName");
-                        messageModel.conversionImage = documentChange.getDocument().getString("receiverImage");
-                        messageModel.conversionId = documentChange.getDocument().getString("receiverId");
+                    if (userData.get(Constant.USER_ID).equals(senderId)){
+                        messageModel.conversionName = documentChange.getDocument().getString(Constant.KEY_RECEIVER_NAME);
+                        messageModel.conversionImage = documentChange.getDocument().getString(Constant.KEY_RECEIVER_IMAGE_URL);
+                        messageModel.conversionId = documentChange.getDocument().getString(Constant.KEY_RECEIVER_ID);
                     }else {
-                        messageModel.conversionName = documentChange.getDocument().getString("senderName");
-                        messageModel.conversionImage = documentChange.getDocument().getString("senderImage");
-                        messageModel.conversionId = documentChange.getDocument().getString("senderId");
+                        messageModel.conversionName = documentChange.getDocument().getString(Constant.KEY_SENDER_NAME);
+                        messageModel.conversionImage = documentChange.getDocument().getString(Constant.KEY_SENDER_IMAGE_URL);
+                        messageModel.conversionId = documentChange.getDocument().getString(Constant.KEY_SENDER_ID);
                     }
-                    messageModel.messageId = documentChange.getDocument().getString("message");
-                    messageModel.dateObject = documentChange.getDocument().getDate("timestamp");
+                    messageModel.messageId = documentChange.getDocument().getString(Constant.KEY_MESSAGE);
+                    messageModel.dateObject = documentChange.getDocument().getDate(Constant.KEY_TIMESTAMP);
                     conversion.add(messageModel);
                 }else if (documentChange.getType() == DocumentChange.Type.MODIFIED){
                     for (int i = 0; i < conversion.size(); i++){
-                        String senderId = documentChange.getDocument().getString("senderId");
-                        String receiverId = documentChange.getDocument().getString("receiverId");
+                        String senderId = documentChange.getDocument().getString(Constant.KEY_SENDER_ID);
+                        String receiverId = documentChange.getDocument().getString(Constant.KEY_RECEIVER_ID);
                         if (conversion.get(i).senderId.equals(senderId) &&
                                         conversion.get(i).receiverId.equals(receiverId)){
-                            conversion.get(i).messageId = documentChange.getDocument().getString("message");
-                            conversion.get(i).dateObject = documentChange.getDocument().getDate("timestamp");
+                            conversion.get(i).messageId = documentChange.getDocument().getString(Constant.KEY_MESSAGE);
+                            conversion.get(i).dateObject = documentChange.getDocument().getDate(Constant.KEY_TIMESTAMP);
                             break;
                         }
                     }
@@ -157,10 +158,10 @@ public class MainActivity extends BaseActivity implements ConversionListener {
     private void updateToken(String token){
         preferences.setToken(token);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference reference = db.collection("users")
+        DocumentReference reference = db.collection(Constant.USER_DIR)
                 .document(auth.getUid());
-        reference.update("token",token)
-                .addOnSuccessListener(unused -> Log.d(TAG, "updateToken: "+token))
+        reference.update(Constant.USER_TOKEN,token)
+                .addOnSuccessListener(unused -> Log.d(Constant.TAG_MAIN, "updateToken: "+token))
                 .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
@@ -168,7 +169,7 @@ public class MainActivity extends BaseActivity implements ConversionListener {
     @Override
     public void onConversionClicked(UserDataModel userDataModel) {
         Intent intent = new Intent(getApplicationContext(), ChatsActivity.class);
-        intent.putExtra("user", userDataModel);
+        intent.putExtra(Constant.USER, userDataModel);
         startActivity(intent);
     }
 }

@@ -84,24 +84,24 @@ public class ChatsActivity extends BaseActivity {
 
     private void sendMessage(){
         HashMap<String, Object> message = new HashMap<>();
-        message.put("senderId", auth.getUid());
-        message.put("receiverId", dataModel.uid);
+        message.put(Constant.KEY_SENDER_ID, auth.getUid());
+        message.put(Constant.KEY_RECEIVER_ID, dataModel.uid);
 //        message.put("receiverImage", dataModel.url);
-        message.put("message",eInputUserMessage.getText().toString());
-        message.put("timestamp",new Date());
-        firestore.collection("chats").add(message);
+        message.put(Constant.KEY_MESSAGE,eInputUserMessage.getText().toString());
+        message.put(Constant.KEY_TIMESTAMP,new Date());
+        firestore.collection(Constant.KEY_CHATS_DIR).add(message);
         if (conversionId != null){
             UpdateConversion(eInputUserMessage.getText().toString());
         }else {
             HashMap<String, Object> conversionMap = new HashMap<>();
-            conversionMap.put("senderId",auth.getUid());
-            conversionMap.put("senderName",userData.get(Preferences.KEY_PROFILE_NAME));
-            conversionMap.put("senderImage",userData.get(Preferences.PROFILE_IMAGE));
-            conversionMap.put("receiverId",dataModel.uid);
-            conversionMap.put("receiverName",dataModel.name);
-            conversionMap.put("receiverImage",dataModel.url);
-            conversionMap.put("message",eInputUserMessage.getText().toString());
-            conversionMap.put("timestamp",new Date());
+            conversionMap.put(Constant.KEY_SENDER_ID,auth.getUid());
+            conversionMap.put(Constant.KEY_SENDER_NAME,userData.get(Constant.KEY_PROFILE_NAME));
+            conversionMap.put(Constant.KEY_SENDER_IMAGE_URL,userData.get(Constant.PROFILE_IMAGE));
+            conversionMap.put(Constant.KEY_RECEIVER_ID,dataModel.uid);
+            conversionMap.put(Constant.KEY_RECEIVER_NAME,dataModel.name);
+            conversionMap.put(Constant.KEY_RECEIVER_IMAGE_URL,dataModel.url);
+            conversionMap.put(Constant.KEY_MESSAGE,eInputUserMessage.getText().toString());
+            conversionMap.put(Constant.KEY_TIMESTAMP,new Date());
             addConversion(conversionMap);
         }
 
@@ -111,10 +111,10 @@ public class ChatsActivity extends BaseActivity {
                 jsonTokens.put(dataModel.token);
 
                 JSONObject data = new JSONObject();
-                data.put("uid",userData.get(Preferences.USER_ID));
-                data.put("name",userData.get(Preferences.KEY_PROFILE_NAME));
-                data.put("token",userData.get(Preferences.USER_TOKEN));
-                data.put("message",eInputUserMessage.getText().toString());
+                data.put(Constant.USER_ID,userData.get(Constant.USER_ID));
+                data.put(Constant.KEY_PROFILE_NAME,userData.get(Constant.KEY_PROFILE_NAME));
+                data.put(Constant.USER_TOKEN,userData.get(Constant.USER_TOKEN));
+                data.put(Constant.KEY_MESSAGE,eInputUserMessage.getText().toString());
                 JSONObject body = new JSONObject();
                 body.put(Constant.REMOTE_MSG_DATA, data);
                 body.put(Constant.REMOTE_MSG_REGISTRATION_IDS, jsonTokens);
@@ -164,7 +164,7 @@ public class ChatsActivity extends BaseActivity {
     }
 
     private void listenAvailabilityOfReceiver(){
-        firestore.collection("users")
+        firestore.collection(Constant.USER_DIR)
                 .document(dataModel.uid)
                 .addSnapshotListener(ChatsActivity.this, ((value, error) -> {
                     if (error != null){
@@ -192,12 +192,12 @@ public class ChatsActivity extends BaseActivity {
 
     private void listenMessage(){
         firestore.collection("chats")
-                .whereEqualTo("senderId",auth.getUid())
-                .whereEqualTo("receiverId",dataModel.uid)
+                .whereEqualTo(Constant.KEY_SENDER_ID,auth.getUid())
+                .whereEqualTo(Constant.KEY_RECEIVER_ID,dataModel.uid)
                 .addSnapshotListener(eventListener);
         firestore.collection("chats")
-                .whereEqualTo("senderId",dataModel.uid)
-                .whereEqualTo("receiverId", auth.getUid())
+                .whereEqualTo(Constant.KEY_SENDER_ID,dataModel.uid)
+                .whereEqualTo(Constant.KEY_RECEIVER_ID, auth.getUid())
                 .addSnapshotListener(eventListener);
     }
 
@@ -210,11 +210,11 @@ public class ChatsActivity extends BaseActivity {
             for (DocumentChange documentChange : value.getDocumentChanges()){
                 if (documentChange.getType() == DocumentChange.Type.ADDED){
                     ChatMessageModel model = new ChatMessageModel();
-                    model.senderId = documentChange.getDocument().getString("senderId");
-                    model.receiverId = documentChange.getDocument().getString("receiverId");
-                    model.messageId = documentChange.getDocument().getString("message");
-                    model.dateObject = documentChange.getDocument().getDate("timestamp");
-                    model.dateTime = getReadableDateTime(documentChange.getDocument().getDate("timestamp"));
+                    model.senderId = documentChange.getDocument().getString(Constant.KEY_SENDER_ID);
+                    model.receiverId = documentChange.getDocument().getString(Constant.KEY_RECEIVER_ID);
+                    model.messageId = documentChange.getDocument().getString(Constant.KEY_MESSAGE);
+                    model.dateObject = documentChange.getDocument().getDate(Constant.KEY_TIMESTAMP);
+                    model.dateTime = getReadableDateTime(documentChange.getDocument().getDate(Constant.KEY_TIMESTAMP));
                     list.add(model);
                 }
             }
@@ -240,7 +240,7 @@ public class ChatsActivity extends BaseActivity {
     }
 
     private void loadReceiverDetails(){
-        dataModel = (UserDataModel) getIntent().getSerializableExtra("user");
+        dataModel = (UserDataModel) getIntent().getSerializableExtra(Constant.USER);
         text_username.setText(dataModel.name);
     }
 
@@ -256,18 +256,18 @@ public class ChatsActivity extends BaseActivity {
     }
 
     private void addConversion(HashMap<String, Object> conversion){
-        firestore.collection("conversions")
+        firestore.collection(Constant.KEY_CONVERSIONS)
                 .add(conversion)
                 .addOnSuccessListener(documentReference -> conversionId = documentReference.getId());
     }
 
     private void UpdateConversion(String message){
         DocumentReference documentReference =
-                firestore.collection("conversions")
+                firestore.collection(Constant.KEY_CONVERSIONS)
                         .document(conversionId);
         documentReference.update(
-                "message", message,
-                "timestamp", new Date()
+                Constant.KEY_MESSAGE, message,
+                Constant.KEY_TIMESTAMP, new Date()
         );
     }
 
@@ -282,9 +282,9 @@ public class ChatsActivity extends BaseActivity {
     }
 
     private void checkConversionRemotely(String senderId, String receiverId){
-        firestore.collection("conversions")
-                .whereEqualTo("senderId", senderId)
-                .whereEqualTo("receiverId", receiverId)
+        firestore.collection(Constant.KEY_CONVERSIONS)
+                .whereEqualTo(Constant.KEY_SENDER_ID, senderId)
+                .whereEqualTo(Constant.KEY_RECEIVER_ID, receiverId)
                 .get()
                 .addOnCompleteListener(conversionOnCompleteListener);
     }

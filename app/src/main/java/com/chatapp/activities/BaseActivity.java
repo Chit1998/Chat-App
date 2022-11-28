@@ -11,6 +11,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -25,8 +26,8 @@ public class BaseActivity extends AppCompatActivity {
         preferences = new Preferences(this);
         HashMap<String, String> userData = preferences.getLogInDetails();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        reference = db.collection("users")
-                .document(userData.get(Preferences.USER_ID));
+        reference = db.collection(Constant.USER_DIR)
+                .document(Objects.requireNonNull(userData.get(Constant.USER_ID)));
     }
 
     @Override

@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.chatapp.R;
+import com.chatapp.help.Constant;
 import com.chatapp.help.Preferences;
 import com.chatapp.models.UserDataModel;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,6 +35,7 @@ import com.google.firebase.storage.StorageReference;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class CreateProfileActivity extends AppCompatActivity {
 
@@ -63,7 +65,7 @@ public class CreateProfileActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         imageRef = storage.getReference().child("profileImages").child(auth.getUid());
         init();
-        if (userData.get(Preferences.KEY_PROFILE_NAME) == null){
+        if (userData.get(Constant.KEY_PROFILE_NAME) == null){
             super.onStart();
         }else {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
@@ -72,10 +74,9 @@ public class CreateProfileActivity extends AppCompatActivity {
 
     }
     //    TODO Token firebase messaging generate
-
     @Override
     protected void onStart() {
-        if (userData.get(Preferences.KEY_PROFILE_NAME) == null){
+        if (userData.get(Constant.KEY_PROFILE_NAME) == null){
         }else {
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
@@ -173,8 +174,8 @@ public class CreateProfileActivity extends AppCompatActivity {
 
     private void saveData(String name, String about, String url) {
         UserDataModel model = new UserDataModel(name, about, url, auth.getUid());
-        firestore.collection("users")
-                .document(auth.getUid())
+        firestore.collection(Constant.USER_DIR)
+                .document(Objects.requireNonNull(auth.getUid()))
                 .set(model)
                 .addOnCompleteListener(task -> {
                     preferences.setData(name, about, url, auth.getUid());

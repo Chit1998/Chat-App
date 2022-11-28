@@ -31,16 +31,16 @@ public class MessageService extends FirebaseMessagingService {
         super.onMessageReceived(message);
 
         UserDataModel dataModel = new UserDataModel();
-        dataModel.uid = message.getData().get("uid");
-        dataModel.name = message.getData().get("name");
-        dataModel.token = message.getData().get(Constant.user_auth_token);
+        dataModel.uid = message.getData().get(Constant.USER_ID);
+        dataModel.name = message.getData().get(Constant.KEY_PROFILE_NAME);
+        dataModel.token = message.getData().get(Constant.USER_TOKEN);
 
         int notificationId = new Random().nextInt();
 
         String channelId = "chat-message";
         Intent intent = new Intent(this, ChatsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra("user", dataModel);
+        intent.putExtra(Constant.USER, dataModel);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,intent,0);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId);
