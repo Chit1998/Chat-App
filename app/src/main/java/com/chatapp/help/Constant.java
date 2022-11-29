@@ -36,12 +36,13 @@ public class Constant {
     public static String KEY_CHATS_DIR = "chats";
     public static String KEY_TIMESTAMP = "timestamp";
     public static String REMOTE_MSG_AUTHORIZATION = "Authorization";
-    public static String REMOTE_MSG_CONTENT_TYPE = "Content-type";
+    public static String REMOTE_MSG_CONTENT_TYPE = "Content-Type";
     public static String REMOTE_MSG_DATA = "data";
     public static String REMOTE_MSG_REGISTRATION_IDS = "registration_ids";
 
 
     public static HashMap<String, String> remoteMsgHeader = null;
+
     public static HashMap<String, String> getRemoteMsgHeaders(){
         if (remoteMsgHeader == null){
             remoteMsgHeader = new HashMap<>();

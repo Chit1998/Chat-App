@@ -18,7 +18,6 @@ public class BaseActivity extends AppCompatActivity {
     private Preferences preferences;
     private DocumentReference reference;
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

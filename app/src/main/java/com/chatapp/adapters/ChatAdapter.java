@@ -70,9 +70,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatVH> {
         }
     }
 
-    public class ChatVH extends RecyclerView.ViewHolder {
-        TextView text_message;
-        TextView textDateTime;
+    class ChatVH extends RecyclerView.ViewHolder {
+        final TextView text_message;
+        final TextView textDateTime;
 
         public ChatVH(@NonNull View itemView) {
             super(itemView);
@@ -84,7 +84,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatVH> {
             text_message.setText(model.messageId);
             textDateTime.setText(model.dateTime);
             if (urlImage != null){
-//                Toast.makeText(itemView.getContext(), "", Toast.LENGTH_SHORT).show();
+                Toast.makeText(itemView.getContext(), urlImage, Toast.LENGTH_SHORT).show();
             }
         }
     }

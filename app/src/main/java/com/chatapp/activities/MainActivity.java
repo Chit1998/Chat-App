@@ -1,6 +1,5 @@
 package com.chatapp.activities;
 
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -159,7 +158,7 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         preferences.setToken(token);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference reference = db.collection(Constant.USER_DIR)
-                .document(auth.getUid());
+                .document(Objects.requireNonNull(auth.getUid()));
         reference.update(Constant.USER_TOKEN,token)
                 .addOnSuccessListener(unused -> Log.d(Constant.TAG_MAIN, "updateToken: "+token))
                 .addOnFailureListener(e -> Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show());

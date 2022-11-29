@@ -4,11 +4,14 @@ package com.chatapp.activities;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chatapp.R;
 import com.chatapp.adapters.ChatAdapter;
@@ -19,6 +22,7 @@ import com.chatapp.models.UserDataModel;
 import com.chatapp.network.ApiClient;
 import com.chatapp.network.ApiService;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
@@ -26,6 +30,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,7 +62,6 @@ public class ChatsActivity extends BaseActivity {
     private EditText eInputUserMessage;
     private ProgressBar progressBar;
     private String conversionId = null;
-    private Preferences preference;
     private HashMap<String, String> userData;
     private Boolean isReceiverAvailable = false;
 
@@ -71,9 +75,8 @@ public class ChatsActivity extends BaseActivity {
         init();
         setListener();
         loadReceiverDetails();
-        preference = new Preferences(this);
+        Preferences preference = new Preferences(this);
         userData = preference.getLogInDetails();
-
 
         adapter = new ChatAdapter(list,auth.getUid());
         rv_chat_messages.setAdapter(adapter);
@@ -94,7 +97,7 @@ public class ChatsActivity extends BaseActivity {
             UpdateConversion(eInputUserMessage.getText().toString());
         }else {
             HashMap<String, Object> conversionMap = new HashMap<>();
-            conversionMap.put(Constant.KEY_SENDER_ID,auth.getUid());
+            conversionMap.put(Constant.KEY_SENDER_ID,userData.get(Constant.USER_ID));
             conversionMap.put(Constant.KEY_SENDER_NAME,userData.get(Constant.KEY_PROFILE_NAME));
             conversionMap.put(Constant.KEY_SENDER_IMAGE_URL,userData.get(Constant.PROFILE_IMAGE));
             conversionMap.put(Constant.KEY_RECEIVER_ID,dataModel.uid);
@@ -104,34 +107,38 @@ public class ChatsActivity extends BaseActivity {
             conversionMap.put(Constant.KEY_TIMESTAMP,new Date());
             addConversion(conversionMap);
         }
-
         if (!isReceiverAvailable){
             try {
                 JSONArray jsonTokens = new JSONArray();
                 jsonTokens.put(dataModel.token);
+//                Toast.makeText(this, dataModel.token, Toast.LENGTH_SHORT).show();
 
                 JSONObject data = new JSONObject();
                 data.put(Constant.USER_ID,userData.get(Constant.USER_ID));
                 data.put(Constant.KEY_PROFILE_NAME,userData.get(Constant.KEY_PROFILE_NAME));
                 data.put(Constant.USER_TOKEN,userData.get(Constant.USER_TOKEN));
                 data.put(Constant.KEY_MESSAGE,eInputUserMessage.getText().toString());
+
                 JSONObject body = new JSONObject();
                 body.put(Constant.REMOTE_MSG_DATA, data);
                 body.put(Constant.REMOTE_MSG_REGISTRATION_IDS, jsonTokens);
 
+                Log.d(Constant.TAG_CHAT, "sendMessage: "+body);
+
                 sendNotification(body.toString());
             }catch (Exception e){
-                e.getMessage();
+                e.printStackTrace();
                 Constant.setMessage(ChatsActivity.this, e.getMessage());
             }
         }
-        eInputUserMessage.setText("");
+        eInputUserMessage.setText(null);
     }
 
     private void sendNotification(String messageBody){
         ApiClient.getClient()
                 .create(ApiService.class)
-                .sendMessage(Constant.getRemoteMsgHeaders(),
+                .sendMessage(
+                        Constant.getRemoteMsgHeaders(),
                         messageBody
                 ).enqueue(new Callback<String>() {
                     @Override
@@ -140,6 +147,7 @@ public class ChatsActivity extends BaseActivity {
                             try {
                                 if (response.body() != null){
                                     JSONObject responseJson = new JSONObject(response.body());
+//                                    Log.d(Constant.TAG_CHAT, "onResponse: "+response.body());
                                     JSONArray results = responseJson.getJSONArray("results");
                                     if (responseJson.getInt("failure") == 1){
                                         JSONObject error = (JSONObject) results.get(0);
@@ -148,9 +156,15 @@ public class ChatsActivity extends BaseActivity {
                                     }
                                 }
                             }catch (JSONException e){
-                                e.getMessage();
+                                e.printStackTrace();
                             }
-                            Constant.setMessage(ChatsActivity.this, "Notification sent successfully");
+                            Log.d(Constant.TAG_CHAT, "onResponse: "+response.body());
+                            FirebaseMessaging.getInstance().subscribeToTopic(response.body())
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()){
+                                            Constant.setMessage(ChatsActivity.this, "Notification sent successfully");
+                                        }
+                                    });
                         }else {
                             Constant.setMessage(ChatsActivity.this, "Error "+response.code());
                         }
@@ -175,13 +189,16 @@ public class ChatsActivity extends BaseActivity {
                             int availability = Objects.requireNonNull(value.getLong(Constant.KEY_AVAILABILITY)).intValue();
                             isReceiverAvailable = availability == 1;
                         }
-                        dataModel.token = value.getString("token");
-                        if (dataModel.url == null){
-                            dataModel.url = value.getString("image");
+
+                        dataModel.token = value.getString(Constant.USER_TOKEN);
+
+                        if (dataModel.url.equals("")){
+                            dataModel.url = value.getString(Constant.PROFILE_IMAGE);
                             adapter.setReceiverProfileImage(dataModel.url);
                             adapter.notifyItemRangeChanged(0, list.size());
                         }
                     }
+
                     if (isReceiverAvailable){
                         findViewById(R.id.text_user_availability).setVisibility(View.VISIBLE);
                     }else {

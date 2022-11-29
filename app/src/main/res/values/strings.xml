@@ -12,4 +12,6 @@
     <string name="all_users">All users</string>
     <string name="type_here">Type here...</string>
     <string name="online">Online</string>
+    <string name="default_notification_channel_id" />
+    <string name="msg_token_fmt">message token fmt</string>
 </resources>

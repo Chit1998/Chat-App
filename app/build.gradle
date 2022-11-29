@@ -20,7 +20,7 @@ android {
         targetSdk 32
         versionCode 1
         versionName "1.0"
-
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
     }
@@ -71,8 +71,10 @@ dependencies {
 //    TODO multidex
     implementation "androidx.multidex:multidex:2.0.1"
 
-//    Retrofit
+//    TODO Retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
+
+    implementation 'androidx.work:work-runtime:2.7.1'
 
 }
